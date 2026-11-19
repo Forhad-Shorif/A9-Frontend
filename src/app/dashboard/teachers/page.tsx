@@ -1,11 +1,11 @@
 import React from 'react';
 
-const Profile = () => {
+const page = () => {
     return (
         <div>
-            sdfs
+            teacher page
         </div>
     );
 };
 
-export default Profile;
+export default page;

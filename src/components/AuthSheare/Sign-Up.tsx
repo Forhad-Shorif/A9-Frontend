@@ -11,47 +11,48 @@ import {
   EyeOff,
   Lock,
   Mail,
-  ShieldCheck,
   UserRound,
   Sparkles,
   CheckCircle2,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { FaGithub, FaGoogle } from "react-icons/fa6"
 
 import { authClient } from "@/lib/auth-client"
 import { showToast } from "@/lib/utils/toast"
+import SocialSign from "./SocialSign"
 
 // ------------------------------------------------------------------
 // 🎭 ইউজারের রোল ডিফিনিশন
 // ------------------------------------------------------------------
-type UserRole = "seeker" | "recruiter" | "admin"
+// BetterAuth server e role er value: "students" | "teachers" | "admin"
+// Ei webapp tuition marketplace, tai dui role: Students ar Teachers.
+type SignUpRole = "students" | "teachers"
 
 const roleOptions: {
-  value: UserRole
+  value: SignUpRole
   label: string
   description: string
   icon: LucideIcon
 }[] = [
     {
-      value: "seeker",
-      label: "Seeker",
-      description: "Looking for dream opportunities.",
+      value: "students",
+      label: "Student",
+      description: "Looking for a tutor for my child.",
       icon: UserRound,
     },
     {
-      value: "recruiter",
-      label: "Recruiter",
-      description: "Hiring top-tier talent.",
+      value: "teachers",
+      label: "Tutor",
+      description: "I want to teach and take tuition jobs.",
       icon: Briefcase,
     },
-    {
-      value: "admin",
-      label: "Admin",
-      description: "Managing platform ecosystem.",
-      icon: ShieldCheck,
-    },
   ]
+
+// Role onujayi sign up er por kothay jabe
+const dashboardByRole: Record<SignUpRole, string> = {
+  students: "/dashboard/students",
+  teachers: "/dashboard/teachers",
+}
 
 // পাসওয়ার্ড শক্তির রুলস
 const passwordRules = [
@@ -65,7 +66,7 @@ export function SignUpForm() {
 
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [role, setRole] = useState<UserRole>("seeker")
+  const [role, setRole] = useState<SignUpRole>("students")
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
 
@@ -102,7 +103,7 @@ export function SignUpForm() {
       }
 
       showToast.success("Account created! Now complete your profile.")
-      router.push("/profile")
+      router.push(dashboardByRole[role])
       router.refresh()
     } catch (error) {
       console.error("Sign up error:", error)
@@ -111,21 +112,6 @@ export function SignUpForm() {
     } finally {
       setLoading(false)
     }
-  }
-
-  // 🌐 সোশ্যাল অথেন্টিকেশন (গুগল ও গিটহাব)
-  const handleGoogleSignIn = async () => {
-    await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/profile",
-    })
-  }
-
-  const handleGithubSignIn = async () => {
-    await authClient.signIn.social({
-      provider: "github",
-      callbackURL: "/profile",
-    })
   }
 
   return (
@@ -152,24 +138,7 @@ export function SignUpForm() {
 
         {/* সোশ্যাল সাইন-আপ বাটন */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-            className="group flex items-center justify-center gap-2.5 rounded-2xl border border-slate-700/60 bg-slate-800/40 px-4 py-3 text-xs sm:text-sm font-medium text-slate-200 transition-all duration-300 hover:bg-slate-800 hover:border-violet-500/50 hover:text-white cursor-pointer active:scale-95 disabled:opacity-50 shadow-sm"
-          >
-            <FaGoogle className="size-4 text-rose-500 transition-transform group-hover:scale-110 duration-300" />
-            Google
-          </button>
-          <button
-            type="button"
-            onClick={handleGithubSignIn}
-            disabled={loading}
-            className="group flex items-center justify-center gap-2.5 rounded-2xl border border-slate-700/60 bg-slate-800/40 px-4 py-3 text-xs sm:text-sm font-medium text-slate-200 transition-all duration-300 hover:bg-slate-800 hover:border-violet-500/50 hover:text-white cursor-pointer active:scale-95 disabled:opacity-50 shadow-sm"
-          >
-            <FaGithub className="size-4 text-white transition-transform group-hover:scale-110 duration-300" />
-            GitHub
-          </button>
+          <SocialSign />
         </div>
 
         {/* ডিভাইডার */}
@@ -192,7 +161,7 @@ export function SignUpForm() {
           <div className="space-y-2">
             <span className="block text-xs sm:text-sm font-medium text-slate-300">I am joining as</span>
 
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {roleOptions.map((option) => {
                 const Icon = option.icon
                 const isSelected = role === option.value

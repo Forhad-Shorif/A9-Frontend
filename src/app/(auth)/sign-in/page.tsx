@@ -1,6 +1,8 @@
 import SignInPage from '@/components/AuthSheare/Sign-In';
-import React from 'react';
+import React, { Suspense } from 'react';
 
+// Sign-In component er vitore useSearchParams() ache, tai Next.js build er somoy
+// eta ke <Suspense> diye wrap korte hoy.
 const page = () => {
     return (
         <main className="min-h-screen w-full relative overflow-hidden bg-[#030712] selection:bg-indigo-500 selection:text-white flex items-center justify-center">
@@ -15,7 +17,15 @@ const page = () => {
             {/* Page Wrapper Container */}
             <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center">
                 <div className="w-full transition-all duration-500 transform hover:scale-[1.005]">
-                    <SignInPage />
+                    <Suspense
+                        fallback={
+                            <div className="flex min-h-[400px] items-center justify-center">
+                                <span className="size-6 animate-spin rounded-full border-2 border-indigo-400 border-t-transparent" />
+                            </div>
+                        }
+                    >
+                        <SignInPage />
+                    </Suspense>
                 </div>
             </div>
             

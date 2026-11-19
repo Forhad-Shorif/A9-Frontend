@@ -9,12 +9,12 @@ import { DashboardSidebar } from "../components/DashboardSideBar"
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <SidebarProvider>
-             <DashboardSidebar/>
-            
+            <DashboardSidebar />
+
             <SidebarInset>
                 <DashboardTopbar />
 
-                <main className="flex-1 p-5 sm:p-8">{children}</main>
+                <main className="flex-1 bg-slate-50 p-5 text-neutral-900 sm:p-8 dark:bg-[#050b10] dark:text-neutral-100">{children}</main>
             </SidebarInset>
         </SidebarProvider>
     )

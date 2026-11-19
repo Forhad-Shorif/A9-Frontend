@@ -29,8 +29,9 @@ export const auth = betterAuth({
         additionalFields: {
             // 🎭 User Role Field
             role: {
-                type: ["seeker", "recruiter", "admin"], // টাইপ অবশ্যই "string" হতে হবে
-                defaultValue: "seeker",
+                // DB te string hisebe save hobe; allowed value: "students" | "teachers" | "admin"
+                type: "string", // টাইপ অবশ্যই "string" হতে হবে
+                defaultValue: "students",
                 required: true,
                 input: true, // ক্লায়েন্ট সাইড থেকে ইনপুট নেওয়ার অনুমতি
             },
