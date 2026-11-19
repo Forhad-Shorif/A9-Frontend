@@ -6,7 +6,6 @@ import {
   GraduationCap,
   Share2,
   Sparkles,
-  Tag,
   User,
 } from "lucide-react";
 import {
@@ -22,31 +21,72 @@ import {
 
 export default function LeftProfileDialog() {
   const [open, setOpen] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const uploadToImgBB = async (file: File): Promise<string> => {
+    const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+    if (!apiKey) {
+      throw new Error("Missing NEXT_PUBLIC_IMGBB_API_KEY");
+    }
+
+    const uploadData = new FormData();
+    uploadData.append("image", file);
+
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+      method: "POST",
+      body: uploadData,
+    });
+
+    const data = await res.json();
+    if (!data?.success || !data?.data?.display_url) {
+      throw new Error("Failed to upload image to ImgBB");
+    }
+
+    return String(data.data.display_url);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setSubmitting(true);
 
-    const formData = new FormData(e.currentTarget);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const manualURL = String(formData.get("photoURL") || "").trim();
 
-    const educations = [
-      String(formData.get("edu1") || "").trim(),
-      String(formData.get("edu2") || "").trim(),
-      String(formData.get("edu3") || "").trim(),
-      String(formData.get("edu4") || "").trim(),
-      String(formData.get("edu5") || "").trim(),
-    ].filter(Boolean);
+      let finalPhotoURL = manualURL;
 
-    const updatedData = {
-      name: String(formData.get("name") || "").trim(),
-      tag: String(formData.get("tag") || "").trim(),
-      photoURL: String(formData.get("photoURL") || "").trim(),
-      facebook: String(formData.get("facebook") || "").trim(),
-      contact: String(formData.get("contact") || "").trim(),
-      educations,
-    };
+      // File সিলেক্ট করা থাকলে ImgBB-তে আপলোড করে URL নেওয়া হবে
+      if (imageFile) {
+        finalPhotoURL = await uploadToImgBB(imageFile);
+      }
 
-    console.log("Updated Profile Data:", updatedData);
-    setOpen(false);
+      const educations = [
+        String(formData.get("edu1") || "").trim(),
+        String(formData.get("edu2") || "").trim(),
+        String(formData.get("edu3") || "").trim(),
+        String(formData.get("edu4") || "").trim(),
+        String(formData.get("edu5") || "").trim(),
+      ].filter(Boolean);
+
+      const updatedData = {
+        name: String(formData.get("name") || "").trim(),
+        tag: String(formData.get("tag") || "").trim(),
+        photoURL: finalPhotoURL,
+        facebook: String(formData.get("facebook") || "").trim(),
+        contact: String(formData.get("contact") || "").trim(),
+        educations,
+      };
+
+      console.log("Final Profile Data:", updatedData);
+
+      setImageFile(null);
+      setOpen(false);
+    } catch (error) {
+      console.error("Submit error:", error);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const inputClass =
@@ -71,7 +111,7 @@ export default function LeftProfileDialog() {
               Update Profile Info
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
-              Your login role stays intact. Update your tag, photo, contact, and optional education.
+              Provide a profile photo URL or upload a file (uploaded to ImgBB automatically).
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -90,29 +130,42 @@ export default function LeftProfileDialog() {
                 placeholder="Full name (e.g. Tariqul Hasan)"
                 className={inputClass}
               />
-              <div className="relative flex items-center">
-                <input
-                  type="text"
-                  name="tag"
-                  placeholder="Short tag (e.g. Teacher 30s / HSC Student)"
-                  className={inputClass}
-                />
-              </div>
+              <input
+                type="text"
+                name="tag"
+                placeholder="Short tag (e.g. Teacher 30s / HSC Student)"
+                className={inputClass}
+              />
             </div>
           </div>
 
-          {/* Profile Photo URL */}
+          {/* Profile Photo: URL OR File */}
           <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-800/80 dark:bg-slate-900/40">
-            <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              <Camera className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
-              <span>Profile Photo</span>
-            </p>
-            <input
-              type="url"
-              name="photoURL"
-              placeholder="Profile photo URL"
-              className={inputClass}
-            />
+            <div className="mb-3 flex items-center justify-between">
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <Camera className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
+                <span>Profile Photo (URL or File)</span>
+              </p>
+              <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                File overrides URL
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              <input
+                type="url"
+                name="photoURL"
+                placeholder="Paste profile photo URL"
+                className={inputClass}
+              />
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                className="w-full cursor-pointer rounded-xl border border-dashed border-slate-300 bg-slate-50/90 px-3.5 py-2 text-xs text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-cyan-500/15 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-cyan-700 hover:border-cyan-500 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300 dark:file:bg-cyan-400/15 dark:file:text-cyan-300 dark:hover:border-cyan-400"
+              />
+            </div>
           </div>
 
           {/* Social & Contact */}
@@ -189,10 +242,10 @@ export default function LeftProfileDialog() {
             </DialogClose>
             <button
               type="submit"
-              className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:brightness-105 active:scale-[0.99] dark:from-cyan-400 dark:to-sky-400 dark:text-slate-950 dark:shadow-[0_0_24px_rgba(34,211,238,0.3)]"
+              disabled={submitting}
+              className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:brightness-105 active:scale-[0.99] disabled:opacity-60 dark:from-cyan-400 dark:to-sky-400 dark:text-slate-950 dark:shadow-[0_0_24px_rgba(34,211,238,0.3)]"
             >
-              <Tag className="hidden h-4 w-4" />
-              <span>Save Changes</span>
+              <span>{submitting ? "Saving..." : "Save Changes"}</span>
             </button>
           </DialogFooter>
         </form>

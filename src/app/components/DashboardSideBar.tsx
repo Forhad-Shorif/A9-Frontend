@@ -43,21 +43,21 @@ const MENU_BY_ROLE: Record<UserRole, NavItem[]> = {
         { label: "Overview", href: "/dashboard/students", icon: LayoutDashboard },
         { label: "My Applications", href: "/dashboard/students/application", icon: ClipboardList },
         { label: "Saved Tuitions", href: "/dashboard/students/saved", icon: Bookmark },
-        { label: "Update Profile", href: "/profile", icon: Settings },
+        { label: "Update Profile", href: "/dashboard/students/profile-setting", icon: Settings },
     ],
     teachers: [
         { label: "Overview", href: "/dashboard/teachers", icon: LayoutDashboard },
         { label: "My Tuitions", href: "/dashboard/teachers/tuitions", icon: FileText },
         { label: "Post Tuition", href: "/dashboard/teachers/post", icon: SquarePlus },
         { label: "Applicants", href: "/dashboard/teachers/applicants", icon: UsersRound },
-        { label: "Update Profile", href: "/profile", icon: Settings },
+        { label: "Update Profile", href: "/dashboard/teachers/profile-setting", icon: Settings },
     ],
     admin: [
         { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard },
         { label: "Users", href: "/dashboard/admin/users", icon: UsersRound },
         { label: "Tuitions", href: "/dashboard/admin/tuitions", icon: FileText },
         { label: "Payments", href: "/dashboard/admin/payments", icon: CreditCard },
-        { label: "Update Profile", href: "/profile", icon: Settings },
+        { label: "Update Profile", href: "/dashboard/admin/profile-setting", icon: Settings },
     ],
 }
 
