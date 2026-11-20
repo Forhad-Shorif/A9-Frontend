@@ -38,7 +38,7 @@ export const auth = betterAuth({
 
             // 🖼️ Cover Image Field
 
-            
+
             coverImage: {
                 type: "string",
                 required: false,

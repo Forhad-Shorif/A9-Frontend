@@ -1,4 +1,7 @@
 // Placeholder page — build pass korar jonno minimal export.
+
+import PostTuitionForm from "@/components/SheareDashboard/SheareTeacher/PostTuition";
+
 // Nije content likhe ei file ta replace koro.
 export default function TeacherPostPage() {
   return (
@@ -8,6 +11,7 @@ export default function TeacherPostPage() {
         Ei page ta ekhono banano hoyni. Notun tuition post korar form ekhane
         thakbe.
       </p>
+      <PostTuitionForm />
     </div>
   );
 }

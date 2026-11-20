@@ -1,13 +1,29 @@
-// Placeholder page — build pass korar jonno minimal export.
-// Nije content likhe ei file ta replace koro.
-export default function TeacherTuitionsPage() {
+import MyTuitionsList, {
+  TuitionItem,
+} from "@/components/SheareDashboard/SheareTeacher/My-Tuition";
+
+export default async function TeacherTuitionsPage() {
+  const backendUrl =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+  let tuitions: TuitionItem[] = [];
+
+  try {
+    const res = await fetch(`${backendUrl}/Tuitions`, {
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      tuitions = Array.isArray(data) ? data : data?.tuitions || [];
+    }
+  } catch (error) {
+    console.error("Failed to fetch tuitions:", error);
+  }
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold tracking-tight">My Tuitions</h1>
-      <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-        Ei page ta ekhono banano hoyni. Tumi post kora tuition gulo ekhane
-        dekhabe.
-      </p>
+    <div className="py-2">
+      <MyTuitionsList initialTuitions={tuitions} />
     </div>
   );
 }

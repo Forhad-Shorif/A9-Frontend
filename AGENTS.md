@@ -14,9 +14,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - **Project:** MentorLagbe — tuition marketplace (students / tutors / admin).
 - **Stack:** Next.js 16.4.6 (App Router), React 19, Tailwind CSS v4, shadcn preset `base-maia` (base-ui primitives), BetterAuth 1.7 + MongoDB driver, hugeicons.
-- **Status:** Early stage. Auth (email/password + Google/GitHub) is wired and **role-based sign up works** (`students` / `teachers` / `admin`). Home navbar + footer are done. Dashboard sidebar is done (neon dark design, role-based menu). Dashboard pages are still placeholders.
+- **Status:** Early stage. Auth (email/password + Google/GitHub) is wired and **role-based sign up works** (`students` / `teachers` / `admin`). Home navbar + footer are done. Dashboard sidebar is done (neon dark design, role-based menu). **Profile page now loads/saves user + teacher data from the Express backend** (GET + POST/PATCH, Add/Edit Info). Dashboard pages are still placeholders.
 - **Build:** `npm run build` passes (was failing on `/sign-in` prerender). `tsc --noEmit` and `eslint` are clean for the files touched.
-- **Backend:** No separate Express server yet; BetterAuth runs inside Next.js at `/api/auth/[...all]`.
+- **Backend:** Express + MongoDB server lives outside this repo at `C:\projects\assignment-9-bk` (default port `8000`). BetterAuth still runs inside Next.js at `/api/auth/[...all]`.
 
 ## 2. Completed Tasks
 
@@ -33,6 +33,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 11. **Dashboard sidebar matched to dark theme:** `.dark { --sidebar }` is now `#060b12` (was shadcn neutral gray), so the sidebar no longer clashes with the navy topbar/content.
 12. **Success section split into Online / Offline:** `OurSuccess.tsx` now shows two story cards (class-from-anywhere + face-to-face classroom) with the user's 2 images, numbers and CTAs, plus an overall stat strip. Hero image switched to `public/image.png`; `public/banner.png` was renamed to `public/Online.png` by the user.
 13. **Features heading fixed for the marketplace:** `Features.tsx` no longer says "Online Education Platform for Everyone". New heading **"Find your course. Find your mentor"** and copy explain the two sides: students search tuitions by subject / class / area / budget, tutors post tuition requests and receive applications. Each card carries a small **For students / For tutors / For everyone** tag, and the section ends with **Browse tuitions** + **Post a tuition** CTAs.
+14. **User + Teacher profile wired to the Express backend:** `/profile` fetches the logged-in user's profile (`GET /UsersGet/:email`) and teacher profile (`GET /TeachersProfile/:email`) on the server. No data → **Add Info**; data present → **Edit Info** with prefilled form. Saving uses `POST` for a new profile and `PATCH /UsersUpdate/:id` / `PATCH /TeachersUpdate/:id` for edits. `router.refresh()` reloads the server page after save. Only `students` and `teachers` get these forms; `admin` is skipped.
+15. **Two separate profile cards:** `UserProfile.tsx` shows the user/personal card (student sees only this). New `TeacherProfile.tsx` exports `TeacherProfileCard` as an independent reusable component (teacher page can import it anywhere). Teacher profile page shows both cards side by side on desktop.
+16. **Backend bugs fixed** in `C:\projects\assignment-9-bk\index.js`: removed the undefined `varify` middleware that crashed the server on startup, teacher POST/GET now share `/TeachersProfile`, teacher GET matches both `email` and `addedBy.email`, and teacher PATCH validates `_id` + sets `updatedAt`.
 
 ## 3. Files Created / Modified
 
@@ -58,6 +61,13 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 | `src/lib/auth-client.ts` | modified | `inferAdditionalFields<typeof auth>()` plugin (typed `role`), `baseURL` now from `NEXT_PUBLIC_APP_URL`. |
 | `src/lib/auth.ts` | modified | `role` field type fixed from array to `"string"` (default `students`). |
 | `src/app/(auth)/sign-in/page.tsx` | modified | Wrapped `<SignInPage />` in `<Suspense>` so build no longer fails on `useSearchParams`. |
+| `src/components/SheareForm/ActionProfile.tsx` | rewritten | Backend actions: `getUserProfile` / `createUserProfile` / `updateUserProfile` and `getTeacherProfile` / `createTeacherProfile` / `updateTeacherProfile`. Same backend URL helper for every call (`NEXT_PUBLIC_API_URL` or `localhost:8000`). |
+| `src/components/SheareForm/Parsonal-Form.tsx` | modified | Accepts `mode: "add" \| "edit"` + `initialData`; prefills fields; POST on add, PATCH on edit; keeps old photo if no new file; trigger shows **Add Info / Edit Info**; calls `router.refresh()`. `mode="add"` hole form er upore "No info added yet" banner dekhay; dialog padding mobile-friendly. |
+| `src/components/SheareForm/Teacher-Form.tsx` | modified | Same add/edit flow for teacher profile; posts to `/TeachersProfile`, patches `/TeachersUpdate/:id`; prefills headline, mode, DOB, location, about, experience, skills. `mode="add"` hole "No teacher info added yet" banner. |
+| `src/components/SheareForm/UserProfile.tsx` | rewritten | User profile card only. **Centered circular avatar on top** (Profile `photoURL`, fallback to the logged-in user image, gradient + initial when empty) with soft glow, name/tag below, then DOB, location, contact, Facebook, education. Takes `profile` prop (no fetch inside). Light + dark styles, responsive avatar size + padding. |
+| `src/components/SheareForm/TeacherProfile.tsx` | created | Reusable `TeacherProfileCard` (headline, teaching mode, experience, location, DOB, email, about, skills chips). Import from any page with `<TeacherProfileCard profile={...} />`. Responsive header, icon and padding. |
+| `src/app/(home)/profile/page.tsx` | modified | Server-side role check + profile fetch. Students see only the User card; teachers see User + Teacher cards. **Teacher Info button only for `teachers`**; header stacks on mobile; cards go 2-column from `md`. No data → Add Info empty state; admin sees no profile forms. `Profile-Form` / `ImageFeild` are rendered exactly as before. |
+| `C:\projects\assignment-9-bk\index.js` (backend) | modified | Fixed teacher routes: `/TeachersProfile` POST/GET, `/TeachersUpdate/:id` PATCH, removed undefined `varify`, teacher GET supports top-level `email`. |
 | `AGENTS.md` | modified | Progress record added. |
 
 ## 4. Decisions & Reasons
@@ -76,6 +86,16 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - **Role mapping:** `students → Student (/dashboard/students)`, `teachers → Teacher (/dashboard/teachers)`, `admin → Admin (/dashboard/admin)`.
 - **Footer is a client component** (`"use client"`) only because hugeicons icons use `forwardRef`; it has no state, so there is no behavior cost. Branding/copy is MentorLagbe with `hello@mentorlagbe.com`; social links are `#` placeholders until real profiles exist.
 - **Nav links are future routes:** `/tuitions`, `/pricing`, `/about`, `/privacy`, `/terms` do not exist yet (404 until built).
+- **Profile Add vs Edit is decided by data:** server page fetches first; `null` → `mode="add"` (POST), data → `mode="edit"` (PATCH with `_id`). One form component handles both, so no duplicate UI.
+- **`Profile-Form.tsx` and `ImageFeild.tsx` were left untouched** (user's request). The original BetterAuth `name` / `image` / `coverImage` update flow still works exactly as before.
+- **Teacher card is its own file** (`TeacherProfile.tsx`) so other pages can reuse `<TeacherProfileCard profile={...} />` without copying JSX.
+- **`UserProfileCard` now receives `profile` as a prop** instead of fetching inside, so the page fetches once and the card stays a simple presentational component.
+- **Admin does not get profile info forms** (`role === "admin"` skips the section), per the requirement that only student and teacher profiles work.
+- **Old profile photo is preserved on edit** unless the user selects a new file: initial `photoURL` is used as the default value.
+- **User card image fallback:** the circular avatar uses `profile.photoURL` first; if that is empty it falls back to the logged-in BetterAuth `user.image`, and finally to a gradient circle with the name's first letter. The auth image itself is never modified from the card.
+- **User card image is a circle, not a banner:** an earlier full-width `h-56` top image was too wide/large, so it was replaced with a centered `h-24 sm:h-28` circular avatar (white ring + soft cyan glow + initial fallback). No fixed wide image area remains.
+- **Responsive layout lives in the page wrapper:** `/profile` header stacks on mobile and cards switch to 2 columns from `md`. `ImageFeild.tsx` / `Profile-Form.tsx` were still not edited (user's earlier rule), so the main cover/avatar block keeps its own existing responsive classes.
+- **"No info yet" message appears twice:** once as the dashed empty card on the page, and once as a yellow banner inside the Add Info dialog (`mode === "add"`). Edit mode never shows that banner because data already exists.
 
 ## 5. Dependencies Added
 
@@ -85,8 +105,17 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - BetterAuth user model has `additionalFields`: `role` (`students` | `teachers` | `admin`, default `students`) and `coverImage`.
 - MongoDB database name: `assignment-projects` (see `src/lib/auth.ts`). Secrets stay in `.env` only.
+- Express backend (`C:\projects\assignment-9-bk\index.js`, default port `8000`) collections:
+  - `Profile` — user profile: `POST /UserProfiles`, `PATCH /UsersUpdate/:id`, `GET /UsersGet/:email`.
+  - `Teacher-Address` — teacher profile: `POST /TeachersProfile`, `PATCH /TeachersUpdate/:id`, `GET /TeachersProfile/:email`.
+  - Both GETs sort by `updatedAt` newest first and match `email` or `addedBy.email`.
+- Frontend needs `NEXT_PUBLIC_API_URL` in `.env` (or it falls back to `http://localhost:8000`).
 
 ## 7. Known Bugs / Pending Issues
+
+- Profile data only appears while the Express backend (`assignment-9-bk`) is running; if `NEXT_PUBLIC_API_URL` is wrong the cards stay in the "Add Info" state.
+- `UserProfile` / `TeacherProfile` cards use `<img>` for ImgBB URLs → known lint warning; switching to `next/image` needs remote image domains in `next.config.ts`.
+- Old POST-only flow may have created duplicate profile documents for the same email. GET returns the newest one, and Edit updates that newest document only; older duplicates can be cleaned in MongoDB Compass.
 
 - `src/app/components/DashboardSideBar.tsx`: `img` lint warning (user avatar) — harmless, `next/image` needs remote domains configured first.
 - Old test accounts may still have `student` / `teacher` / `seeker` / `recruiter` in MongoDB `user.role`. Update them to `students` / `teachers` (MongoDB Compass); unknown values fall back to `students`.

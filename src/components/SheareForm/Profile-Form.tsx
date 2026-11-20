@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Edit3 } from "lucide-react";
 import {
   Dialog,
@@ -12,8 +13,13 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { showToast } from "@/lib/utils/toast";
+import { authClient } from "@/lib/auth-client";
+import ClientUser from "@/lib/ClientUser";
 
 export default function Profile() {
+  const router = useRouter();
+  const user = ClientUser() as { name?: string | null } | null;
+
   const [open, setOpen] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -47,31 +53,45 @@ export default function Profile() {
 
     try {
       const formData = new FormData(e.currentTarget);
+      const nameValue = String(formData.get("name") || "").trim();
 
-      let finalPhotoURL = String(formData.get("photoURL") || "").trim();
-      let finalCoverPhoto = String(formData.get("coverPhoto") || "").trim();
+      const payload: Record<string, string> = {};
+
+      if (nameValue) {
+        payload.name = nameValue;
+      }
 
       if (photoFile) {
-        finalPhotoURL = await uploadToImgBB(photoFile);
+        payload.image = await uploadToImgBB(photoFile);
       }
 
       if (coverFile) {
-        finalCoverPhoto = await uploadToImgBB(coverFile);
+        payload.coverImage = await uploadToImgBB(coverFile);
       }
 
-      const updatedProfile = {
-        name: String(formData.get("name") || "").trim(),
-        photoURL: finalPhotoURL,
-        coverPhoto: finalCoverPhoto,
-      };
+      if (Object.keys(payload).length === 0) {
+        showToast.error("Please enter a name or select a photo");
+        return;
+      }
 
-      console.log(updatedProfile);
+      const { error } = await authClient.updateUser(
+        payload as Parameters<typeof authClient.updateUser>[0]
+      );
 
+      if (error) {
+        throw new Error(error.message || "Failed to update profile");
+      }
+
+      await authClient.getSession();
+      router.refresh();
+
+      showToast.success("Profile updated successfully");
       setPhotoFile(null);
       setCoverFile(null);
       setOpen(false);
     } catch (error) {
-      showToast.error("file upload error")
+      console.error(error);
+      showToast.error("Profile update failed");
     } finally {
       setUploading(false);
     }
@@ -101,21 +121,16 @@ export default function Profile() {
           <input
             type="text"
             name="name"
+            defaultValue={user?.name || ""}
             placeholder="Your name"
             className={inputClass}
           />
 
-          {/* Profile Photo: URL or File */}
+          {/* Profile Photo File Only */}
           <div className="space-y-2 rounded-xl border border-slate-200/80 p-3 dark:border-slate-800/80">
             <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
-              Profile Photo (URL or File)
+              Profile Photo File
             </p>
-            <input
-              type="url"
-              name="photoURL"
-              placeholder="Profile photo URL"
-              className={inputClass}
-            />
             <input
               type="file"
               accept="image/*"
@@ -124,17 +139,11 @@ export default function Profile() {
             />
           </div>
 
-          {/* Cover Photo: URL or File */}
+          {/* Cover Photo File Only */}
           <div className="space-y-2 rounded-xl border border-slate-200/80 p-3 dark:border-slate-800/80">
             <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
-              Cover Photo (URL or File)
+              Cover Photo File
             </p>
-            <input
-              type="url"
-              name="coverPhoto"
-              placeholder="Cover photo URL"
-              className={inputClass}
-            />
             <input
               type="file"
               accept="image/*"

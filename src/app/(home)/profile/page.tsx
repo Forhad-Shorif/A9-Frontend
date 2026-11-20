@@ -1,28 +1,46 @@
 import React from "react";
 import Profile from "@/components/SheareForm/Profile-Form";
-import Image from "next/image";
 import LeftProfileDialog from "@/components/SheareForm/Parsonal-Form";
-import ServerUser from "@/lib/ServerUser";
 import TeacherProfileDialog from "@/components/SheareForm/Teacher-Form";
+import ServerUser from "@/lib/ServerUser";
+import ProfileMediaSection from "@/components/SheareForm/ImageFeild";
+import UserProfileCard from "@/components/SheareForm/UserProfile";
+import TeacherProfileCard from "@/components/SheareForm/TeacherProfile";
+import {
+  getTeacherProfile,
+  getUserProfile,
+} from "@/components/SheareForm/ActionProfile";
+import { getRole } from "@/lib/roles";
 
 const ProfilePage = async () => {
+  const user = await ServerUser();
 
-  const users = await ServerUser();
+  // Login na thakle profile dekhano jabe na.
+  if (!user) {
+    return (
+      <main className="min-h-screen bg-slate-50 p-4 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100 md:p-8">
+        <div className="mx-auto max-w-4xl rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          Please sign in to view your profile.
+        </div>
+      </main>
+    );
+  }
 
-  const user = {
-    name: "Forhad Shorif",
-    location: "Dhaka, Bangladesh",
-    bio: "Full-stack web developer building modern, fast, and responsive web applications.",
-    photoURL: "https://placehold.co/160x160/0f172a/22d3ee?text=FS",
-    coverPhoto: "",
-  };
+  const role = getRole(user.role);
+  const email = user.email || "";
+
+  // Backend theke login kora user er profile data ana hoy.
+  // Admin er jonno ei profile info section cholbe na (shudhu student + teacher).
+  const userProfile = role !== "admin" ? await getUserProfile(email) : null;
+  const teacherProfile =
+    role === "teachers" ? await getTeacherProfile(email) : null;
 
   return (
     <main className="min-h-screen bg-slate-50 p-4 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100 md:p-8">
-      <div className="mx-auto max-w-4xl space-y-5">
+      <div className="mx-auto max-w-5xl space-y-5">
         {/* Top Header with Update Profile on One Side */}
-        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-5 py-4 shadow-sm backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/70">
-          <div>
+        <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/90 px-4 py-4 shadow-sm backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/70 sm:px-5 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0">
             <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white sm:text-xl">
               My Profile
             </h1>
@@ -30,55 +48,84 @@ const ProfilePage = async () => {
               Manage your personal info and appearance
             </p>
           </div>
-          {users?.role === "teachers" ? (<TeacherProfileDialog />) : ("")}
-          <LeftProfileDialog />
-          <Profile />
+
+          <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:justify-end">
+            {/* Teacher er jonno shudhu Teacher Info button */}
+            {role === "teachers" && (
+              <TeacherProfileDialog
+                mode={teacherProfile ? "edit" : "add"}
+                initialData={teacherProfile}
+              />
+            )}
+            {/* Student ar Teacher duijoner jonno personal info button */}
+            {role !== "admin" && (
+              <LeftProfileDialog
+                mode={userProfile ? "edit" : "add"}
+                initialData={userProfile}
+              />
+            )}
+            <Profile />
+          </div>
         </div>
 
         {/* Main Profile Card */}
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800/80 dark:bg-slate-900/70">
-          {/* Cover Photo */}
-          <div className="relative h-44 w-full overflow-hidden bg-gradient-to-r from-cyan-500/20 via-sky-500/10 to-slate-200 dark:from-cyan-500/20 dark:via-slate-900 dark:to-slate-950 md:h-56">
-            {user.coverPhoto && (
-              <Image
-                src={user.coverPhoto}
-                alt={`${user.name || "User"} cover photo`}
-                fill
-                sizes="(max-width: 768px) 100vw, 896px"
-                className="object-cover"
-              />
-            )}
-          </div>
+        <ProfileMediaSection />
 
-          {/* Profile Info */}
-          <div className="px-6 pb-7">
-            <div className="-mt-14 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div className="flex flex-col gap-3.5 sm:flex-row sm:items-end">
-                <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full border-4 border-white bg-slate-900 shadow-lg ring-2 ring-cyan-500/30 dark:border-slate-900">
-                  <Image
-                    src={
-                      user.photoURL ||
-                      "https://placehold.co/160x160/0f172a/22d3ee?text=Avatar"
-                    }
-                    alt={user.name || "User profile photo"}
-                    fill
-                    sizes="112px"
-                    className="object-cover"
-                  />
-                </div>
+        {/* Student: shudhu User card. Teacher: User card + alada Teacher card. */}
+        {role !== "admin" &&
+          (role === "teachers" ? (
+            <div className="grid items-start gap-4 md:grid-cols-2 md:gap-5">
+              {userProfile ? (
+                <UserProfileCard
+                  profile={userProfile}
+                  fallbackName={user.name || undefined}
+                  fallbackImage={user.image || undefined}
+                />
+              ) : (
+                <EmptyCard>
+                  No user profile info added yet. Click the &quot;Add Info&quot;
+                  button above to add it.
+                </EmptyCard>
+              )}
 
-                <div className="pb-1">
-                  <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                    {user.name}
-                  </h2>
-                </div>
-              </div>
+              {teacherProfile ? (
+                <TeacherProfileCard profile={teacherProfile} />
+              ) : (
+                <EmptyCard>
+                  Teacher info not added yet. Click the &quot;Add Teacher
+                  Info&quot; button above to add it.
+                </EmptyCard>
+              )}
             </div>
-          </div>
-        </section>
+          ) : userProfile ? (
+            <UserProfileCard
+              profile={userProfile}
+              fallbackName={user.name || undefined}
+              fallbackImage={user.image || undefined}
+            />
+          ) : (
+            <EmptyCard>
+              No profile info added yet. Click the &quot;Add Info&quot; button
+              above to add your details.
+            </EmptyCard>
+          ))}
+
       </div>
     </main>
   );
 };
+
+interface EmptyCardProps {
+  children: React.ReactNode;
+}
+
+// Profile data na thakle ei dashed card ta dekhano hoy.
+function EmptyCard({ children }: EmptyCardProps) {
+  return (
+    <div className="flex w-full items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white/70 p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-400">
+      {children}
+    </div>
+  );
+}
 
 export default ProfilePage;
