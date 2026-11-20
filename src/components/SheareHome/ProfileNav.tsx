@@ -38,7 +38,7 @@ const ProfileNav = () => {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user as
-    | { name?: string; email?: string; role?: string }
+    | { name?: string; email?: string; role?: string; image?: string | null }
     | undefined;
 
   // Session load howar age ekta chhoto skeleton dekhai (layout jump na hoy).
@@ -99,9 +99,19 @@ const ProfileNav = () => {
           />
         }
       >
-        {/* Avatar: name er initials */}
-        <span className="grid size-8 place-items-center rounded-full bg-gradient-to-br from-teal-500 to-teal-700 text-xs font-bold text-white">
-          {getInitials(name)}
+        {/* Avatar: profile image thakle seta, na thakle initials */}
+        <span className="relative size-8 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-teal-500 to-teal-700">
+          {user.image ? (
+            <img
+              src={user.image}
+              alt={name}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="grid h-full w-full place-items-center text-xs font-bold text-white">
+              {getInitials(name)}
+            </span>
+          )}
         </span>
 
         <span className="hidden text-left sm:block">

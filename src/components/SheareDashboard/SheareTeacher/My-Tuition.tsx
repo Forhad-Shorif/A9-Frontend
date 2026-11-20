@@ -10,9 +10,11 @@ import {
     Eye,
     GraduationCap,
     MapPin,
+    Pencil,
     Plus,
     Power,
     Sparkles,
+    Trash2,
     XCircle,
 } from "lucide-react";
 import DeleteTuitionDialog from "./DeleteTuitionDialog";
@@ -30,6 +32,7 @@ export interface TuitionItem {
     classDuration?: string;
     courseDuration?: string;
     applyDeadline?: string;
+    about?: string;
     coverImageURL?: string;
     logoImageURL?: string;
     status?: "active" | "closed" | string;
@@ -286,17 +289,29 @@ export default function MyTuitionsList({ initialTuitions }: MyTuitionsListProps)
                                                         <Eye className="h-4 w-4" />
                                                     </Link>
 
-                                                    <EditTuitionDialog
-                                                        open={editOpen}
-                                                        onOpenChange={setEditOpen}
-                                                        tuition={selectedTuition}
-                                                    />
+                                                    <button
+                                                        type="button"
+                                                        title="Edit"
+                                                        onClick={() => {
+                                                            setSelectedTuition(item);
+                                                            setEditOpen(true);
+                                                        }}
+                                                        className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-teal-600 hover:text-teal-700 dark:border-slate-800 dark:text-slate-300 dark:hover:border-cyan-400 dark:hover:text-cyan-300"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </button>
 
-                                                    <DeleteTuitionDialog
-                                                        open={deleteOpen}
-                                                        onOpenChange={setDeleteOpen}
-                                                        id={deleteId}
-                                                    />
+                                                    <button
+                                                        type="button"
+                                                        title="Delete"
+                                                        onClick={() => {
+                                                            setDeleteId(item._id);
+                                                            setDeleteOpen(true);
+                                                        }}
+                                                        className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-rose-500 hover:text-rose-600 dark:border-slate-800 dark:text-slate-300 dark:hover:border-rose-400 dark:hover:text-rose-400"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -307,6 +322,29 @@ export default function MyTuitionsList({ initialTuitions }: MyTuitionsListProps)
                     </div>
                 </div>
             )}
+
+            {/* Dialog ekbar render hoy; row er Edit/Delete button theke open hoy */}
+            <EditTuitionDialog
+                open={editOpen}
+                onOpenChange={setEditOpen}
+                tuition={selectedTuition}
+                onUpdated={(updated) => {
+                    setTuitions((prev) =>
+                        prev.map((row) =>
+                            row._id === updated._id ? { ...row, ...updated } : row
+                        )
+                    );
+                }}
+            />
+
+            <DeleteTuitionDialog
+                open={deleteOpen}
+                onOpenChange={setDeleteOpen}
+                id={deleteId}
+                onDeleted={(id) => {
+                    setTuitions((prev) => prev.filter((row) => row._id !== id));
+                }}
+            />
         </div>
     );
 }

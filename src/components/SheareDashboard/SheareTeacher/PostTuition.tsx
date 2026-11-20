@@ -112,8 +112,8 @@ export default function PostTuitionForm() {
         about: String(formData.get("about") || "").trim(),
         coverImageURL,
         logoImageURL,
-        Name: user?.name || "Teacher",
-        Email: user?.email || "",
+        name: user?.name || "Teacher",
+        email: user?.email || "",
         mentorId: user?.id || "",
         createdAt: new Date().toISOString(),
       };
@@ -121,7 +121,7 @@ export default function PostTuitionForm() {
       const backendUrl =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-      const res = await fetch(`${backendUrl}/Tuitions`, {
+      const res = await fetch(`${backendUrl}/TuitionsPost`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

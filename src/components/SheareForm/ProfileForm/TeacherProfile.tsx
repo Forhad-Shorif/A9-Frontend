@@ -8,7 +8,7 @@ import {
   MapPin,
   Video,
 } from "lucide-react";
-import { TeacherProfileItem } from "@/components/SheareForm/ActionProfile";
+import { TeacherProfileItem } from "@/components/SheareForm/ProfileForm/ActionProfile";
 
 interface TeacherProfileCardProps {
   profile: TeacherProfileItem;

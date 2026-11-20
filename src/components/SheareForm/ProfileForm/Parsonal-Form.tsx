@@ -25,21 +25,10 @@ import ClientUser from "@/lib/ClientUser";
 import { showToast } from "@/lib/utils/toast";
 import {
   createUserProfile,
-  updateUserProfile,
   UserProfileFormData,
-  UserProfileItem,
-} from "@/components/SheareForm/ActionProfile";
+} from "@/components/SheareForm/ProfileForm/ActionProfile";
 
-// mode "add" hole profile create (POST), "edit" hole update (PATCH) hobe.
-interface PersonalProfileDialogProps {
-  mode: "add" | "edit";
-  initialData?: UserProfileItem | null;
-}
-
-export default function LeftProfileDialog({
-  mode,
-  initialData,
-}: PersonalProfileDialogProps) {
+export default function AddLeftProfileDialog() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -66,19 +55,17 @@ export default function LeftProfileDialog({
 
     return String(data.data.display_url);
   };
+
   const user = ClientUser();
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
 
-
     try {
       const formData = new FormData(e.currentTarget);
 
-      // Edit korle purono photo thakbe, notun file dile seta upload hobe.
-      let finalPhotoURL = initialData?.photoURL || "";
-
-      // File সিলেক্ট করা থাকলে ImgBB-তে আপলোড করে URL নেওয়া হবে
+      let finalPhotoURL = "";
       if (imageFile) {
         finalPhotoURL = await uploadToImgBB(imageFile);
       }
@@ -104,24 +91,14 @@ export default function LeftProfileDialog({
         Id: user?.id ?? undefined,
       };
 
-      // Data already ache kina dekhe POST (add) ba PATCH (edit) call kori.
-      const saved =
-        mode === "edit" && initialData?._id
-          ? await updateUserProfile(initialData._id, profileData)
-          : await createUserProfile(profileData);
+      const created = await createUserProfile(profileData);
 
-      if (!saved) {
+      if (!created) {
         showToast.error("Failed to save profile");
         return;
       }
 
-      showToast.success(
-        mode === "edit"
-          ? "Profile updated successfully"
-          : "Profile added successfully"
-      );
-
-      // Server page abar data fetch kore, tai notun data sathe sathe dekha jabe.
+      showToast.success("Profile added successfully");
       router.refresh();
       setImageFile(null);
       setOpen(false);
@@ -140,7 +117,7 @@ export default function LeftProfileDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="group inline-flex items-center gap-2 rounded-xl border border-cyan-500/35 bg-gradient-to-r from-cyan-500/15 via-sky-500/10 to-cyan-500/15 px-4 py-2.5 text-sm font-semibold text-cyan-800 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-500/60 hover:bg-cyan-500/20 hover:shadow-md dark:border-cyan-400/30 dark:bg-gradient-to-r dark:from-cyan-500/20 dark:via-sky-500/10 dark:to-cyan-400/20 dark:text-cyan-200 dark:shadow-[0_0_20px_rgba(34,211,238,0.12)] dark:hover:border-cyan-400/70 dark:hover:text-white dark:hover:shadow-[0_0_28px_rgba(34,211,238,0.25)]">
         <Sparkles className="h-4 w-4 text-cyan-600 transition-transform duration-200 group-hover:scale-110 dark:text-cyan-400" />
-        <span>{mode === "edit" ? "Edit Info" : "Add Info"}</span>
+        <span>Add User Info</span>
       </DialogTrigger>
 
       <DialogContent className="max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200/90 bg-white/95 p-0 text-slate-900 shadow-2xl backdrop-blur-xl dark:border-cyan-500/25 dark:bg-slate-950/95 dark:text-slate-100 dark:shadow-[0_0_50px_rgba(6,182,212,0.18)] sm:max-w-xl">
@@ -152,23 +129,18 @@ export default function LeftProfileDialog({
               <span>Profile & Qualifications</span>
             </div>
             <DialogTitle className="mt-2 text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-              {mode === "edit" ? "Update Profile Info" : "Add Profile Info"}
+              Add Profile Info
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
-              {mode === "edit"
-                ? "Update your basic details, date of birth, address, and education qualifications."
-                : "Add your basic details, date of birth, address, and education qualifications."}
+              Add your basic details, date of birth, address, and education qualifications.
             </DialogDescription>
           </DialogHeader>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5 px-4 py-5 sm:px-6">
-          {/* Data na thakle form er uporei bole dey */}
-          {mode === "add" && (
-            <p className="rounded-xl border border-amber-300/70 bg-amber-50 px-3.5 py-2.5 text-xs font-medium text-amber-800 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-200">
-              No info added yet. Fill out the form below and click Add Info.
-            </p>
-          )}
+          <p className="rounded-xl border border-amber-300/70 bg-amber-50 px-3.5 py-2.5 text-xs font-medium text-amber-800 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-200">
+            Fill out the form below and click Add Info to save your profile details.
+          </p>
 
           {/* Identity, DOB & Address */}
           <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-800/80 dark:bg-slate-900/40">
@@ -180,14 +152,12 @@ export default function LeftProfileDialog({
               <input
                 type="text"
                 name="name"
-                defaultValue={initialData?.name || ""}
                 placeholder="Full name (e.g. Tariqul Hasan)"
                 className={inputClass}
               />
               <input
                 type="text"
                 name="tag"
-                defaultValue={initialData?.tag || ""}
                 placeholder="Short tag (e.g. Teacher / Student)"
                 className={inputClass}
               />
@@ -200,7 +170,6 @@ export default function LeftProfileDialog({
                 <input
                   type="date"
                   name="dateOfBirth"
-                  defaultValue={initialData?.dateOfBirth || ""}
                   className={inputClass}
                 />
               </div>
@@ -213,7 +182,6 @@ export default function LeftProfileDialog({
                 <input
                   type="text"
                   name="location"
-                  defaultValue={initialData?.location || ""}
                   placeholder="City, Area or Address"
                   className={inputClass}
                 />
@@ -251,14 +219,12 @@ export default function LeftProfileDialog({
               <input
                 type="text"
                 name="facebook"
-                defaultValue={initialData?.facebook || ""}
                 placeholder="Facebook handle or URL"
                 className={inputClass}
               />
               <input
                 type="text"
                 name="contact"
-                defaultValue={initialData?.contact || ""}
                 placeholder="Email or phone contact"
                 className={inputClass}
               />
@@ -281,35 +247,30 @@ export default function LeftProfileDialog({
               <input
                 type="text"
                 name="edu1"
-                defaultValue={initialData?.educations?.[0] || ""}
                 placeholder="1. Masters / Post-Grad (e.g. M.Sc. in Applied Math - DU)"
                 className={inputClass}
               />
               <input
                 type="text"
                 name="edu2"
-                defaultValue={initialData?.educations?.[1] || ""}
                 placeholder="2. Graduation / Honours (e.g. B.Sc. in Physics - BUET)"
                 className={inputClass}
               />
               <input
                 type="text"
                 name="edu3"
-                defaultValue={initialData?.educations?.[2] || ""}
                 placeholder="3. HSC / College (e.g. HSC in Science)"
                 className={inputClass}
               />
               <input
                 type="text"
                 name="edu4"
-                defaultValue={initialData?.educations?.[3] || ""}
                 placeholder="4. SSC / School (e.g. SSC in Science)"
                 className={inputClass}
               />
               <input
                 type="text"
                 name="edu5"
-                defaultValue={initialData?.educations?.[4] || ""}
                 placeholder="5. Extra degree / course / certification (optional)"
                 className={inputClass}
               />
@@ -325,13 +286,7 @@ export default function LeftProfileDialog({
               disabled={submitting}
               className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:brightness-105 active:scale-[0.99] disabled:opacity-60 dark:from-cyan-400 dark:to-sky-400 dark:text-slate-950 dark:shadow-[0_0_24px_rgba(34,211,238,0.3)]"
             >
-              <span>
-                {submitting
-                  ? "Saving..."
-                  : mode === "edit"
-                  ? "Save Changes"
-                  : "Add Info"}
-              </span>
+              <span>{submitting ? "Saving..." : "Add Info"}</span>
             </button>
           </DialogFooter>
         </form>

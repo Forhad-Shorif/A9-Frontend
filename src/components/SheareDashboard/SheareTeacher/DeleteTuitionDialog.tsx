@@ -15,12 +15,14 @@ interface DeleteTuitionDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     id: string | null;
+    onDeleted?: (id: string) => void;
 }
 
 export default function DeleteTuitionDialog({
     open,
     onOpenChange,
     id,
+    onDeleted,
 }: DeleteTuitionDialogProps) {
     const [deleting, setDeleting] = useState(false);
 
@@ -37,6 +39,7 @@ export default function DeleteTuitionDialog({
             });
 
             if (res.ok) {
+                onDeleted?.(id);
                 onOpenChange(false);
             }
         } catch (error) {

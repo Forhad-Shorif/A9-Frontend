@@ -30,7 +30,7 @@ import ThemeToggle from "./ThemeToggle";
 // Navbar-er link gulo ek jaygay: label + href + icon
 const navLinks = [
   { label: "Home", href: "/", icon: Home01Icon },
-  { label: "Browse Tuitions", href: "/tuitions", icon: BookOpen01Icon },
+  { label: "Browse Tuitions", href: "/browsetuitions", icon: BookOpen01Icon },
   { label: "Pricing", href: "/pricing", icon: DollarSignIcon },
   { label: "About", href: "/about", icon: InformationCircleIcon },
 ];

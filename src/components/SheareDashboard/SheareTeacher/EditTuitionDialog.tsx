@@ -18,12 +18,14 @@ interface EditTuitionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tuition: TuitionItem | null;
+  onUpdated?: (updated: TuitionItem) => void;
 }
 
 export default function EditTuitionDialog({
   open,
   onOpenChange,
   tuition,
+  onUpdated,
 }: EditTuitionDialogProps) {
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
@@ -45,7 +47,7 @@ export default function EditTuitionDialog({
     setLocation(tuition.location || "");
     setWeeklyClasses(tuition.weeklyClasses || "");
     setCourseDuration(tuition.courseDuration || "");
-    setAbout((tuition as TuitionItem & { about?: string }).about || "");
+    setAbout(tuition.about || "");
   }, [tuition]);
 
   const backendUrl =
@@ -74,6 +76,17 @@ export default function EditTuitionDialog({
       });
 
       if (res.ok) {
+        onUpdated?.({
+          ...(tuition as TuitionItem),
+          title: title.trim(),
+          subject: subject.trim(),
+          classLevel: classLevel.trim(),
+          monthlyFee: Number(monthlyFee || 0),
+          location: location.trim(),
+          weeklyClasses: weeklyClasses.trim(),
+          courseDuration: courseDuration.trim(),
+          about: about.trim(),
+        });
         onOpenChange(false);
       }
     } catch (error) {

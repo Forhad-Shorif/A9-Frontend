@@ -1,16 +1,18 @@
 import React from "react";
-import Profile from "@/components/SheareForm/Profile-Form";
-import LeftProfileDialog from "@/components/SheareForm/Parsonal-Form";
-import TeacherProfileDialog from "@/components/SheareForm/Teacher-Form";
+import Profile from "@/components/SheareForm/ProfileForm/Profile-Form";
 import ServerUser from "@/lib/ServerUser";
-import ProfileMediaSection from "@/components/SheareForm/ImageFeild";
-import UserProfileCard from "@/components/SheareForm/UserProfile";
-import TeacherProfileCard from "@/components/SheareForm/TeacherProfile";
+import ProfileMediaSection from "@/components/SheareForm/ProfileForm/ImageFeild";
+import UserProfileCard from "@/components/SheareForm/ProfileForm/UserProfile";
+import TeacherProfileCard from "@/components/SheareForm/ProfileForm/TeacherProfile";
 import {
   getTeacherProfile,
   getUserProfile,
-} from "@/components/SheareForm/ActionProfile";
+} from "@/components/SheareForm/ProfileForm/ActionProfile";
 import { getRole } from "@/lib/roles";
+import EditTeacherProfileDialog from "@/components/SheareForm/ProfileForm/EditTeacherProfileDialog";
+import AddTeacherProfileDialog from "@/components/SheareForm/ProfileForm/Teacher-Form";
+import EditLeftProfileDialog from "@/components/SheareForm/ProfileForm/EditLeftProfileDialog";
+import AddLeftProfileDialog from "@/components/SheareForm/ProfileForm/Parsonal-Form";
 
 const ProfilePage = async () => {
   const user = await ServerUser();
@@ -38,7 +40,7 @@ const ProfilePage = async () => {
   return (
     <main className="min-h-screen bg-slate-50 p-4 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100 md:p-8">
       <div className="mx-auto max-w-5xl space-y-5">
-        {/* Top Header with Update Profile on One Side */}
+        {/* Top Header with Post / Update Profile Actions */}
         <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/90 px-4 py-4 shadow-sm backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/70 sm:px-5 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0">
             <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white sm:text-xl">
@@ -50,20 +52,22 @@ const ProfilePage = async () => {
           </div>
 
           <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:justify-end">
-            {/* Teacher er jonno shudhu Teacher Info button */}
-            {role === "teachers" && (
-              <TeacherProfileDialog
-                mode={teacherProfile ? "edit" : "add"}
-                initialData={teacherProfile}
-              />
-            )}
-            {/* Student ar Teacher duijoner jonno personal info button */}
-            {role !== "admin" && (
-              <LeftProfileDialog
-                mode={userProfile ? "edit" : "add"}
-                initialData={userProfile}
-              />
-            )}
+            {/* Teacher profile data thakle Update, na thakle Post Data */}
+            {role === "teachers" &&
+              (teacherProfile ? (
+                <EditTeacherProfileDialog initialData={teacherProfile} />
+              ) : (
+                <AddTeacherProfileDialog />
+              ))}
+
+            {/* User profile data thakle Update, na thakle Post Data */}
+            {role !== "admin" &&
+              (userProfile ? (
+                <EditLeftProfileDialog initialData={userProfile} />
+              ) : (
+                <AddLeftProfileDialog />
+              ))}
+
             <Profile />
           </div>
         </div>
@@ -83,8 +87,8 @@ const ProfilePage = async () => {
                 />
               ) : (
                 <EmptyCard>
-                  No user profile info added yet. Click the &quot;Add Info&quot;
-                  button above to add it.
+                  No user profile info posted yet. Click the &quot;Post Data&quot;
+                  / &quot;Add Info&quot; button above to post it.
                 </EmptyCard>
               )}
 
@@ -92,8 +96,8 @@ const ProfilePage = async () => {
                 <TeacherProfileCard profile={teacherProfile} />
               ) : (
                 <EmptyCard>
-                  Teacher info not added yet. Click the &quot;Add Teacher
-                  Info&quot; button above to add it.
+                  Teacher info not posted yet. Click the button above to post
+                  it.
                 </EmptyCard>
               )}
             </div>
@@ -105,11 +109,10 @@ const ProfilePage = async () => {
             />
           ) : (
             <EmptyCard>
-              No profile info added yet. Click the &quot;Add Info&quot; button
-              above to add your details.
+              No profile info posted yet. Click the button above to post your
+              details.
             </EmptyCard>
           ))}
-
       </div>
     </main>
   );

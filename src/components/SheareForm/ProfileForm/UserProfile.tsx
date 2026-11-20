@@ -7,7 +7,7 @@ import {
   Share2,
   UserRound,
 } from "lucide-react";
-import { UserProfileItem } from "@/components/SheareForm/ActionProfile";
+import { UserProfileItem } from "@/components/SheareForm/ProfileForm/ActionProfile";
 
 interface UserProfileCardProps {
   profile: UserProfileItem;
