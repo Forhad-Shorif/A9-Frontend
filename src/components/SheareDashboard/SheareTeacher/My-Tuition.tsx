@@ -282,7 +282,7 @@ export default function MyTuitionsList({ initialTuitions }: MyTuitionsListProps)
                                             <td className="px-5 py-4">
                                                 <div className="flex items-center justify-end gap-1.5">
                                                     <Link
-                                                        href={`/tuitions/${item._id}`}
+                                                        href={`/view/${item._id}`}
                                                         title="View"
                                                         className="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-teal-600 hover:text-teal-700 dark:border-slate-800 dark:text-slate-300 dark:hover:border-cyan-400 dark:hover:text-cyan-300"
                                                     >

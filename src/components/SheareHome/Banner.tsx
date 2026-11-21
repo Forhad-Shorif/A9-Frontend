@@ -94,7 +94,7 @@ const HeroBanner = () => {
 
           {/* ---------- Search form ---------- */}
           <form
-            action="/tuitions"
+            action="/browsetuitions"
             className="mt-7 flex max-w-xl flex-col gap-2 rounded-[26px] border border-teal-100 bg-white/90 p-2 shadow-[0_18px_36px_-28px_rgba(13,148,136,0.8)] backdrop-blur sm:flex-row sm:items-center dark:border-white/10 dark:bg-white/5"
           >
             <label className="flex flex-1 items-center gap-2.5 px-3">

@@ -16,9 +16,9 @@ import {
 
 // Footer-er link gulo ek jaygay, jate pore change kora shohoj hoy
 const studentLinks = [
-  { label: "Find a Tutor", href: "/tuitions" },
-  { label: "Browse Tuitions", href: "/tuitions" },
-  { label: "Subject Categories", href: "/tuitions" },
+  { label: "Find a Tutor", href: "/browsetuitions" },
+  { label: "Browse Tuitions", href: "/browsetuitions" },
+  { label: "Subject Categories", href: "/browsetuitions" },
   { label: "How It Works", href: "/about" },
 ];
 

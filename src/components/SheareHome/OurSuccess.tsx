@@ -37,7 +37,7 @@ const stories = [
       { value: "4.9/5", label: "average tutor rating" },
     ],
     cta: "Browse online tuitions",
-    href: "/tuitions?mode=online",
+    href: "/browsetuitions?mode=online",
     badgeClass: "bg-teal-600 text-white dark:bg-teal-400 dark:text-[#04121a]",
     frameClass:
       "bg-gradient-to-br from-teal-100 via-cyan-50 to-white dark:from-teal-400/15 dark:via-cyan-400/10 dark:to-transparent",
@@ -61,7 +61,7 @@ const stories = [
       { value: "64", label: "areas covered" },
     ],
     cta: "Browse offline tuitions",
-    href: "/tuitions?mode=offline",
+    href: "/browsetuitions?mode=offline",
     badgeClass: "bg-teal-600 text-white dark:bg-teal-400 dark:text-[#04121a]",
     frameClass: "bg-neutral-900",
     imageClass: "object-cover",

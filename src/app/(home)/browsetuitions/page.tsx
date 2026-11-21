@@ -2,7 +2,21 @@ import React from "react";
 import { Sparkles } from "lucide-react";
 import BrowseTuitionsClient from "@/components/SheareHome/BrowseTuitionsClient";
 
-export default function BrowseTuitionsPage() {
+interface BrowseTuitionsPageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+const firstValue = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
+
+export default async function BrowseTuitionsPage({
+  searchParams,
+}: BrowseTuitionsPageProps) {
+  const params = await searchParams;
+  const initialSearch =
+    firstValue(params.q) || firstValue(params.search) || "";
+  const initialMode = firstValue(params.mode) || "";
+
   return (
     <div className="mx-auto max-w-6xl space-y-7 px-4 py-8 text-slate-900 dark:text-slate-100">
       {/* Server Side Heading */}
@@ -21,7 +35,10 @@ export default function BrowseTuitionsPage() {
       </div>
 
       {/* Client Side Fetch + Search + Filter */}
-      <BrowseTuitionsClient />
+      <BrowseTuitionsClient
+        initialSearch={initialSearch}
+        initialMode={initialMode}
+      />
     </div>
   );
 }

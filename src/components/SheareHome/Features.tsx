@@ -201,7 +201,7 @@ const Features = () => {
         {/* ---------- CTA ---------- */}
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row lg:mt-12">
           <Link
-            href="/tuitions"
+            href="/browsetuitions"
             className="group/cta inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_35px_-18px_rgba(13,148,136,0.85)] transition-transform duration-300 hover:-translate-y-0.5 dark:from-teal-500 dark:to-cyan-500 dark:text-[#04121a]"
           >
             Browse tuitions
